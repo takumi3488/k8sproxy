@@ -26,6 +26,16 @@ await redisClient.connect();
 
 const app = new Hono();
 
+// Check host
+app.use("*", async (c, next) => {
+	const host = c.req.header("Host");
+	if (!host) {
+		return c.html(<Layout>400: Bad request</Layout>, 400);
+	}
+	await next();
+});
+
+// Check session ID
 const checkSessionID = async (c: Context, next: Next) => {
 	const sessionId = getCookie(c, "session_id");
 	if (
@@ -35,12 +45,6 @@ const checkSessionID = async (c: Context, next: Next) => {
 	}
 	await next();
 };
-
-// Index page
-app.get("/", checkSessionID, async (c) => {
-	const paths = Object.keys(urlMap);
-	return c.html(<Index paths={paths} />);
-});
 
 // Login page
 app.get(
@@ -53,10 +57,7 @@ app.get(
 		}
 		await next();
 	},
-	async (c) => {
-		const host = c.req.header("Host")!;
-		return c.html(<Login />);
-	},
+	async (c) => c.html(<Login />),
 );
 
 // Login post
@@ -76,7 +77,7 @@ app.post("/login", async (c) => {
 	setCookie(c, "session_id", sessionId, {
 		path: "/",
 		secure: NODE_ENV === "production",
-		domain: new URL(c.req.url).hostname,
+		domain: new URL(c.req.url).hostname.split(".").slice(-2).join("."),
 		httpOnly: true,
 		maxAge: 60 * 60 * 24 * 30,
 		sameSite: NODE_ENV === "production" ? "None" : "Lax",
@@ -84,28 +85,16 @@ app.post("/login", async (c) => {
 	return c.redirect("/");
 });
 
-app.all("/:svc", checkSessionID, async (c) => {
+app.all("*", checkSessionID, async (c) => {
 	// Rewrite only the URL portion and proxy it.
-	const svc = c.req.param("svc");
-	if (!(svc in urlMap)) {
-		return c.html(<Layout>404: Service not found</Layout>, 404);
+	const host = c.req.header("Host")!;
+	const subdomain = host.split(".")[0];
+	if (subdomain === "k8sproxy") {
+		return c.html(<Index paths={Object.keys(urlMap)} />);
 	}
-	const url = urlMap[svc];
+	const url = urlMap[host.split(".")[0]];
 	const raw = c.req.raw;
 	const req = new Request(`${url}`, { ...raw });
-	return fetch(req);
-});
-
-app.all("/:svc/:path", checkSessionID, async (c) => {
-	// Rewrite only the URL portion and proxy it.
-	const svc = c.req.param("svc");
-	const path = c.req.param("path");
-	if (!(svc in urlMap)) {
-		return c.html(<Layout>404: Service not found</Layout>, 404);
-	}
-	const url = urlMap[svc];
-	const raw = c.req.raw;
-	const req = new Request(`${url}/${path}`, { ...raw });
 	return fetch(req);
 });
 

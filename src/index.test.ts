@@ -4,13 +4,26 @@ import app, { PASSWORD } from ".";
 const password = atob(PASSWORD!);
 
 describe("E2E", () => {
-	test("redirect when not logged in", async () => {
+	test("without host", async () => {
 		const res = await app.request("/");
+		expect(res.status).toBe(400);
+	});
+
+	test("redirect when not logged in", async () => {
+		const res = await app.request("/", {
+			headers: {
+				host: "nginx",
+			},
+		});
 		expect(res.status).toBe(302);
 	});
 
 	test("login page", async () => {
-		const res = await app.request("/login");
+		const res = await app.request("/login", {
+			headers: {
+				host: "nginx",
+			},
+		});
 		expect(res.status).toBe(200);
 		expect(await res.text()).toContain("Login to k8sproxy");
 	});
@@ -20,6 +33,7 @@ describe("E2E", () => {
 		const res = await app.request("/login", {
 			method: "POST",
 			headers: {
+				host: "nginx",
 				"Content-Type": "application/x-www-form-urlencoded",
 			},
 			body: new URLSearchParams({
@@ -37,6 +51,7 @@ describe("E2E", () => {
 		// ログイン後のページのテスト
 		const res2 = await app.request("/", {
 			headers: {
+				host: "k8sproxy",
 				cookie: `session_id=${sessionId};`,
 			},
 		});
@@ -44,8 +59,9 @@ describe("E2E", () => {
 		expect(await res2.text()).toContain("k8sproxy pages");
 
 		// プロキシのテスト
-		const res3 = await app.request("/nginx", {
+		const res3 = await app.request("/", {
 			headers: {
+				host: "nginx",
 				cookie: `session_id=${sessionId};`,
 			},
 		});
