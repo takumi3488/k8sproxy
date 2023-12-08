@@ -92,7 +92,7 @@ app.all("*", checkSessionID, async (c) => {
 	if (subdomain === "k8sproxy") {
 		return c.html(<Index paths={Object.keys(urlMap)} />);
 	}
-	const url = urlMap[host.split(".")[0]];
+	const url = urlMap[host.split(".")[0]] + c.req.path;
 	const raw = c.req.raw;
 	const req = new Request(`${url}`, { ...raw });
 	return fetch(req);
