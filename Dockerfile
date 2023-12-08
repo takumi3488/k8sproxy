@@ -37,11 +37,11 @@ RUN bun run build
 # copy production dependencies and source code into final image
 FROM oven/bun:distroless AS release
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /usr/src/app/dist .
+COPY --from=prerelease /usr/src/app/dist/index.js .
 COPY --from=prerelease /usr/src/app/package.json .
 ENV NODE_ENV=production
 
 # run the app
-USER bun
+USER nonroot
 EXPOSE 3000/tcp
-ENTRYPOINT [ "bun", "run", "dist/index.js" ]
+ENTRYPOINT [ "bun", "run", "index.js" ]
