@@ -4,3 +4,6 @@ tasks:
   test:
     cmds:
       - docker compose run --build --rm k8sproxy bun test
+  prod:
+    cmds:
+      - docker compose -f compose.yml -f compose.prod.yml up

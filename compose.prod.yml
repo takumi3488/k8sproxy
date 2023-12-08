@@ -1,0 +1,5 @@
+services:
+  k8sproxy:
+    build:
+      context: .
+      target: release
