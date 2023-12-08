@@ -9,7 +9,11 @@ export const Login: FC<{ msg?: string }> = ({ msg }) => {
 				{msg && <p class="notice">{msg}</p>}
 				<form action="/login" method="post">
 					<div>
-						<input type="password" placeholder="Enter password" name="password" />
+						<input
+							type="password"
+							placeholder="Enter password"
+							name="password"
+						/>
 					</div>
 					<button type="submit">Submit</button>
 				</form>
