@@ -7,6 +7,8 @@
 
 例えば、`/a/index.html` を `http://a-svc.example.com/index.html` にプロキシできます。
 
+KubernetesのIngressの代わりに使うことを想定していますが、他の用途でも使えると思います。
+
 ## 環境変数
 
 PASSWORD: BASE64エンコーディングしたパスワード
