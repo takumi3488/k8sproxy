@@ -1,0 +1,30 @@
+services:
+  k8sproxy:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      nginx:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+  nginx:
+    image: nginx:1.25.3-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O /dev/null http://localhost || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 3
+  redis:
+    image: redis:7.2.3-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 3

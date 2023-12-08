@@ -1,0 +1,6 @@
+version: "3"
+
+tasks:
+  test:
+    cmds:
+      - docker compose run --build --rm k8sproxy bun test
