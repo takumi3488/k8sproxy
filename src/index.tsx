@@ -94,9 +94,12 @@ app.all("*", checkSessionID, async (c) => {
 	}
 	const url = urlMap[host.split(".")[0]] + c.req.path;
 	const raw = c.req.raw;
-	console.log({raw});
-	const req = new Request(`${url}`, { ...raw });
-	console.log({req});
+	const req = new Request(`${url}`, {
+		method: raw.method,
+		headers: raw.headers,
+		body: raw.body,
+		referrer: raw.referrer,
+	});
 	return fetch(req);
 });
 
