@@ -57,9 +57,7 @@ setInterval(async () => {
 		}
 	}
 	for (const key of newKeys) {
-		if (!keys.includes(key)) {
-			urlMaps[key] = newUrlMaps[key];
-		}
+		urlMaps[key] = newUrlMaps[key];
 	}
 	console.log("Updated URL map", urlMaps);
 }, 1000 * 60);
