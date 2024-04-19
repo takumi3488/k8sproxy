@@ -73,7 +73,7 @@ app.use("*", async (c, next) => {
 
 // Check session ID
 const checkSessionID = async (c: Context, next: Next) => {
-	const host = c.req.header("Host")!;
+	const host = c.req.header("Host") as string;
 	const subdomain = host.split(".")[0];
 	if (subdomain === "k8sproxy") {
 		return await next();
@@ -129,7 +129,7 @@ app.post("/login", async (c) => {
 
 app.all("*", checkSessionID, async (c) => {
 	// Rewrite only the URL portion and proxy it.
-	const host = c.req.header("Host")!;
+	const host = c.req.header("Host") as string;
 	const subdomain = host.split(".")[0];
 	if (subdomain === "k8sproxy") {
 		return c.html(<Index paths={Object.values(urlMaps).map(urlMap => urlMap.proxyTo)} />);

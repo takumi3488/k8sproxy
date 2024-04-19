@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import app, { PASSWORD } from ".";
 
-const password = atob(PASSWORD!);
+const password = atob(PASSWORD as string);
 
 describe("Public page", () => {
 	test("without host", async () => {
