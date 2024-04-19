@@ -66,7 +66,14 @@ setInterval(async () => {
 
 const app = new Hono();
 app.use(logger());
-app.use(cors());
+app.use(cors({
+	origin: '*',
+	allowHeaders: ['*'],
+	allowMethods: ['*'],
+	exposeHeaders: ['*'],
+	maxAge: 600,
+	credentials: true,
+}));
 
 // Check host
 app.use("*", async (c, next) => {
