@@ -18,6 +18,18 @@ describe("Public page", () => {
 		expect(res.status).toBe(200);
 		expect(await res.text()).toContain("Welcome to nginx!");
 	})
+
+	test("cors", async () => {
+		const res = await app.request("/", {
+			headers: {
+				host: "public.example.com",
+				origin: "https://third.example.com",
+			},
+		});
+		expect(res.status).toBe(200);
+		expect(res.headers.get("Access-Control-Allow-Origin")).toBe("http://third.example.com");
+		expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
+	});
 })
 
 describe("Private", () => {

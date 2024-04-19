@@ -9,7 +9,7 @@ import { Login } from "./components/Login";
 import postgres from 'postgres'
 
 // Load environment variables
-export const { PASSWORD, REDIS_URL, POSTGRES_URL, NODE_ENV } = Bun.env;
+export const { PASSWORD, REDIS_URL, POSTGRES_URL, NODE_ENV, ALLOWED_ORIGINS } = Bun.env;
 if (!PASSWORD) {
 	throw new Error("PASSWORD is not set");
 }
@@ -18,6 +18,9 @@ if (!REDIS_URL) {
 }
 if (!POSTGRES_URL) {
 	throw new Error("POSTGRES_URL is not set");
+}
+if (!ALLOWED_ORIGINS) {
+	throw new Error("ALLOWED_ORIGINS is not set");
 }
 
 // Redis client
@@ -70,7 +73,7 @@ app.use("*", async (c, next) => {
 	await next();
 });
 app.use(cors({
-	origin: "*",
+	origin: ALLOWED_ORIGINS.split(","),
 	maxAge: 600,
 	credentials: true,
 }));
