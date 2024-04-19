@@ -99,14 +99,14 @@ const checkSessionID = async (c: Context, next: Next) => {
 	if (
 		!(sessionId && (await redisClient.get(`k8sproxy:sessions:${sessionId}`))) && urlMap.isSecure
 	) {
-		return c.redirect("/login");
+		return c.redirect("/k8sproxy/login");
 	}
 	await next();
 };
 
 // Login page
 app.get(
-	"/login",
+	"/k8sproxy/login",
 	async (c, next) => {
 		// Check session ID
 		const sessionId = getCookie(c, "session_id");
@@ -119,7 +119,7 @@ app.get(
 );
 
 // Login post
-app.post("/login", async (c) => {
+app.post("/k8sproxy/login", async (c) => {
 	const { password } = await c.req.parseBody();
 
 	// Check password

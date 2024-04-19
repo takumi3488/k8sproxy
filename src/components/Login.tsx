@@ -7,7 +7,7 @@ export const Login: FC<{ msg?: string }> = ({ msg }) => {
 			<div>
 				<h3 class="text-center mt-8">Login to k8sproxy</h3>
 				{msg && <p class="notice">{msg}</p>}
-				<form action="/login" method="post">
+				<form action="/k8sproxy/login" method="post">
 					<div>
 						<input
 							type="password"

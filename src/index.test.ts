@@ -48,7 +48,7 @@ describe("Private", () => {
 	});
 
 	test("login page", async () => {
-		const res = await app.request("/login", {
+		const res = await app.request("/k8sproxy/login", {
 			headers: {
 				host: "private.example.com",
 			},
@@ -58,7 +58,7 @@ describe("Private", () => {
 	});
 
 	test("login", async () => {
-		const res = await app.request("/login", {
+		const res = await app.request("/k8sproxy/login", {
 			method: "POST",
 			headers: {
 				host: "private.example.com",
