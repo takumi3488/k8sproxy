@@ -9,7 +9,7 @@ export const Index: FC<{ paths: string[] }> = ({ paths }) => {
 				<ul>
 					{paths.map((path) => (
 						<li>
-							<a href={`/${path}`}>{path}</a>
+							<a href={`${path}`}>{path}</a>
 						</li>
 					))}
 				</ul>

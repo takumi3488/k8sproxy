@@ -3,7 +3,24 @@ import app, { PASSWORD } from ".";
 
 const password = atob(PASSWORD!);
 
-describe("E2E", () => {
+describe("Public page", () => {
+	test("without host", async () => {
+		const res = await app.request("/");
+		expect(res.status).toBe(400);
+	});
+
+	test("public page", async () => {
+		const res = await app.request("/", {
+			headers: {
+				host: "public.example.com",
+			},
+		});
+		expect(res.status).toBe(200);
+		expect(await res.text()).toContain("Welcome to nginx!");
+	})
+})
+
+describe("Private", () => {
 	test("without host", async () => {
 		const res = await app.request("/");
 		expect(res.status).toBe(400);
@@ -12,7 +29,7 @@ describe("E2E", () => {
 	test("redirect when not logged in", async () => {
 		const res = await app.request("/", {
 			headers: {
-				host: "nginx",
+				host: "private.example.com",
 			},
 		});
 		expect(res.status).toBe(302);
@@ -21,7 +38,7 @@ describe("E2E", () => {
 	test("login page", async () => {
 		const res = await app.request("/login", {
 			headers: {
-				host: "nginx",
+				host: "private.example.com",
 			},
 		});
 		expect(res.status).toBe(200);
@@ -29,11 +46,10 @@ describe("E2E", () => {
 	});
 
 	test("login", async () => {
-		// ログインのテスト
 		const res = await app.request("/login", {
 			method: "POST",
 			headers: {
-				host: "nginx",
+				host: "private.example.com",
 				"Content-Type": "application/x-www-form-urlencoded",
 			},
 			body: new URLSearchParams({
@@ -48,24 +64,22 @@ describe("E2E", () => {
 			?.match(/session_id=([^;]+)/)?.[1];
 		expect(sessionId).toBeTruthy();
 
-		// ログイン後のページのテスト
 		const res2 = await app.request("/", {
 			headers: {
-				host: "k8sproxy",
+				host: "private.example.com",
 				cookie: `session_id=${sessionId};`,
 			},
 		});
 		expect(res2.status).toBe(200);
-		expect(await res2.text()).toContain("k8sproxy pages");
+		expect(await res2.text()).toContain("Welcome to nginx!");
 
-		// プロキシのテスト
 		const res3 = await app.request("/", {
 			headers: {
-				host: "nginx",
+				host: "k8sproxy.example.com",
 				cookie: `session_id=${sessionId};`,
 			},
 		});
 		expect(res3.status).toBe(200);
-		expect(await res3.text()).toContain("Welcome to nginx!");
+		expect(await res3.text()).toContain("k8sproxy pages");
 	});
 });
