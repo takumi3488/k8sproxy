@@ -2,7 +2,6 @@ import { randomUUID } from "crypto";
 import { Context, Hono, Next } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import { createClient } from "redis";
 import { Index } from "./components/Index";
 import { Layout } from "./components/Layout";
