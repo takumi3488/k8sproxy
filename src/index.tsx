@@ -1,6 +1,8 @@
 import { randomUUID } from "crypto";
 import { Context, Hono, Next } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
+import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 import { createClient } from "redis";
 import { Index } from "./components/Index";
 import { Layout } from "./components/Layout";
@@ -39,6 +41,7 @@ const urlMaps = Object.fromEntries(
 	(await sql<UrlMap[]>`SELECT * FROM url_maps`)
 		.map((urlMap) => [urlMap.subdomain, { proxyTo: urlMap.proxyTo, isSecure: urlMap.isSecure }])
 );
+console.log("Initial URL map", urlMaps);
 
 // Update URL map every minute
 setInterval(async () => {
@@ -58,9 +61,12 @@ setInterval(async () => {
 			urlMaps[key] = newUrlMaps[key];
 		}
 	}
+	console.log("Updated URL map", urlMaps);
 }, 1000 * 60);
 
 const app = new Hono();
+app.use(logger());
+app.use(cors());
 
 // Check host
 app.use("*", async (c, next) => {
