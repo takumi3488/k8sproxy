@@ -137,8 +137,9 @@ app.all("*", checkSessionID, async (c) => {
 	// Rewrite only the URL portion and proxy it.
 	const host = c.req.header("Host") as string;
 	const subdomain = host.split(".")[0];
+	const domain = host.split(".").slice(1).join(".");
 	if (subdomain === "k8sproxy") {
-		return c.html(<Index paths={Object.values(urlMaps).map(urlMap => urlMap.proxyTo)} />);
+		return c.html(<Index paths={Object.keys(urlMaps).map(urlMap=>`https://${urlMap}.${domain}`)} />);
 	}
 	const url = urlMaps[subdomain].proxyTo + c.req.path;
 	const raw = c.req.raw;
