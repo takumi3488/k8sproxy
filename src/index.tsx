@@ -161,7 +161,7 @@ app.all("*", checkSessionID, async (c) => {
 			host: urlMaps[subdomain].proxyTo.replace(/^https?:\/\//, "").split("/")[0],
 			origin: undefined
 		},
-		body: raw.body,
+		body: raw.method.toUpperCase() === "GET" ? undefined : await new Response(raw.body).text(),
 		credentials: "include"
 	};
 	const req = new Request(`${url}`, reqInit);
