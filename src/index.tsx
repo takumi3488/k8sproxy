@@ -159,6 +159,7 @@ app.all("*", checkSessionID, async (c) => {
 		headers: {
 			...raw.headers,
 			host: urlMaps[subdomain].proxyTo.replace(/^https?:\/\//, "").split("/")[0],
+			origin: undefined
 		},
 		body: raw.body,
 		referrer: raw.referrer,
