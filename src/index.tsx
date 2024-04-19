@@ -156,7 +156,10 @@ app.all("*", checkSessionID, async (c) => {
 	const raw = c.req.raw;
 	const req = new Request(`${url}`, {
 		method: raw.method,
-		headers: raw.headers,
+		headers: {
+			...raw.headers,
+			host: urlMaps[subdomain].proxyTo.replace(/^https?:\/\//, "").split("/")[0],
+		},
 		body: raw.body,
 		referrer: raw.referrer,
 	});
