@@ -154,7 +154,7 @@ app.all("*", checkSessionID, async (c) => {
 	const url = urlMaps[subdomain].proxyTo + c.req.path;
 	console.log(`Proxying to: ${url}`)
 	const raw = c.req.raw;
-	const req = new Request(`${url}`, {
+	const reqInit: RequestInit = {
 		method: raw.method,
 		headers: {
 			...raw.headers,
@@ -162,8 +162,10 @@ app.all("*", checkSessionID, async (c) => {
 			origin: undefined
 		},
 		body: raw.body,
-		referrer: raw.referrer,
-	});
+		credentials: "include"
+	};
+	const req = new Request(`${url}`, reqInit);
+	console.table({ reqInit })
 	return fetch(req);
 });
 
