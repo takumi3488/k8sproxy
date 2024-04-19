@@ -38,7 +38,7 @@ interface UrlMap {
 	isSecure: boolean;
 }
 const urlMaps = Object.fromEntries(
-	(await sql<UrlMap[]>`SELECT * FROM url_maps`)
+	((await sql<UrlMap[]>`SELECT * FROM url_maps`) || [])
 		.map((urlMap) => [urlMap.subdomain, { proxyTo: urlMap.proxyTo, isSecure: urlMap.isSecure }])
 );
 console.log("Initial URL map", urlMaps);
@@ -46,7 +46,7 @@ console.log("Initial URL map", urlMaps);
 // Update URL map every minute
 setInterval(async () => {
 	const newUrlMaps = Object.fromEntries(
-		(await sql<UrlMap[]>`SELECT * FROM url_maps`)
+		((await sql<UrlMap[]>`SELECT * FROM url_maps`) || [])
 			.map((urlMap) => [urlMap.subdomain, { proxyTo: urlMap.proxyTo, isSecure: urlMap.isSecure }])
 	);
 	const keys = Object.keys(urlMaps);
