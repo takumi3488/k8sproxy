@@ -63,7 +63,12 @@ setInterval(async () => {
 }, 1000 * 60);
 
 const app = new Hono();
-app.use(logger());
+app.use("*", async (c, next) => {
+	const timestamp = new Date().toISOString();
+	console.log(`${timestamp} ${c.req.method} ${c.req.url}`);
+	console.log(`Origin: ${JSON.stringify(c.req.header("Origin"))}`);
+	console.log(`Host: ${JSON.stringify(c.req.header("Host"))}`);
+});
 app.use(cors({
 	origin: '*',
 	allowHeaders: ['*'],
