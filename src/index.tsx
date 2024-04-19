@@ -152,6 +152,7 @@ app.all("*", checkSessionID, async (c) => {
 		return c.html(<Index paths={Object.keys(urlMaps).map(urlMap => `https://${urlMap}.${domain}`)} />);
 	}
 	const url = urlMaps[subdomain].proxyTo + c.req.path;
+	console.log(`Proxying to: ${url}`)
 	const raw = c.req.raw;
 	const req = new Request(`${url}`, {
 		method: raw.method,
