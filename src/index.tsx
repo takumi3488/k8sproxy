@@ -71,10 +71,7 @@ app.use("*", async (c, next) => {
 	await next();
 });
 app.use(cors({
-	origin: '*',
-	allowHeaders: ['*'],
-	allowMethods: ['*'],
-	exposeHeaders: ['*'],
+	origin: "*",
 	maxAge: 600,
 	credentials: true,
 }));
@@ -150,7 +147,7 @@ app.all("*", checkSessionID, async (c) => {
 	const subdomain = host.split(".")[0];
 	const domain = host.split(".").slice(1).join(".");
 	if (subdomain === "k8sproxy") {
-		return c.html(<Index paths={Object.keys(urlMaps).map(urlMap=>`https://${urlMap}.${domain}`)} />);
+		return c.html(<Index paths={Object.keys(urlMaps).map(urlMap => `https://${urlMap}.${domain}`)} />);
 	}
 	const url = urlMaps[subdomain].proxyTo + c.req.path;
 	const raw = c.req.raw;
