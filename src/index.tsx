@@ -174,7 +174,7 @@ app.all("*", checkSessionID, async (c) => {
 	);
 	raw.headers.delete("origin");
 	const req = new Request(raw);
-	console.log(JSON.stringify(req, null, 2));
+	console.log(JSON.stringify(raw, null, 2));
 	return fetch(req);
 });
 
