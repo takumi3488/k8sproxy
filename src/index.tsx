@@ -165,16 +165,22 @@ app.all("*", checkSessionID, async (c) => {
 			/>,
 		);
 	}
-	const url = urlMaps[subdomain].proxyTo + c.req.path;
-	console.log(`Proxying to: ${url}`);
 	const raw = c.req.raw;
+	const url = urlMaps[subdomain].proxyTo + c.req.path;
 	raw.headers.set(
 		"host",
 		urlMaps[subdomain].proxyTo.replace(/^https?:\/\//, "").split("/")[0],
 	);
 	raw.headers.delete("origin");
-	const req = new Request(raw);
-	console.log(JSON.stringify(raw, null, 2));
+	const req = new Request(url, {
+		method: raw.method,
+		headers: raw.headers,
+		body: raw.body,
+		credentials: raw.credentials,
+	});
+	console.log(JSON.stringify({ url: req.url }, null, 2));
+	console.log(JSON.stringify({ headers: req.headers }, null, 2));
+	console.log(JSON.stringify({ body: req.body }, null, 2));
 	return fetch(req);
 });
 
