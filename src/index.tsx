@@ -165,7 +165,7 @@ app.all("*", checkSessionID, async (c) => {
 		credentials: "include"
 	};
 	const req = new Request(`${url}`, reqInit);
-	console.table({ reqInit })
+	console.table({ raw: raw, reqInit: reqInit })
 	return fetch(req);
 });
 
