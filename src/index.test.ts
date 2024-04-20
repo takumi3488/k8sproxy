@@ -17,7 +17,7 @@ describe("Public page", () => {
 		});
 		expect(res.status).toBe(200);
 		expect(await res.text()).toContain("Welcome to nginx!");
-	})
+	});
 
 	test("cors", async () => {
 		const res = await app.request("/", {
@@ -27,10 +27,12 @@ describe("Public page", () => {
 			},
 		});
 		expect(res.status).toBe(200);
-		expect(res.headers.get("Access-Control-Allow-Origin")).toBe("http://third.example.com");
+		expect(res.headers.get("Access-Control-Allow-Origin")).toBe(
+			"http://third.example.com",
+		);
 		expect(res.headers.get("Access-Control-Allow-Credentials")).toBe("true");
 	});
-})
+});
 
 describe("Private", () => {
 	test("without host", async () => {
