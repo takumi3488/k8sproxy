@@ -46,7 +46,6 @@ const urlMaps = Object.fromEntries(
 		{ proxyTo: urlMap.proxyTo, isSecure: urlMap.isSecure },
 	]),
 );
-console.log("Initial URL map", urlMaps);
 
 // Update URL map every minute
 setInterval(async () => {
@@ -70,13 +69,6 @@ setInterval(async () => {
 }, 1000 * 60);
 
 const app = new Hono();
-app.use("*", async (c, next) => {
-	const timestamp = new Date().toISOString();
-	console.log(`${timestamp} ${c.req.method} ${c.req.url}`);
-	console.log(`Origin: ${JSON.stringify(c.req.header("Origin"))}`);
-	console.log(`Host: ${JSON.stringify(c.req.header("Host"))}`);
-	await next();
-});
 app.use(
 	cors({
 		origin: ALLOWED_ORIGINS.split(","),
@@ -98,14 +90,10 @@ app.use("*", async (c, next) => {
 const checkSessionID = async (c: Context, next: Next) => {
 	const host = c.req.header("Host") as string;
 	const subdomain = host.split(".")[0];
-	if (subdomain === "k8sproxy") {
-		return await next();
-	}
-	const urlMap = urlMaps[subdomain];
 	const sessionId = getCookie(c, "session_id");
 	if (
-		!(sessionId && (await redisClient.get(`k8sproxy:sessions:${sessionId}`))) &&
-		urlMap.isSecure
+			!(sessionId && (await redisClient.get(`k8sproxy:sessions:${sessionId}`))) &&
+				(subdomain in urlMaps && urlMaps[subdomain].isSecure || subdomain === "k8sproxy")
 	) {
 		return c.redirect("/k8sproxy/login");
 	}
@@ -151,6 +139,7 @@ app.post("/k8sproxy/login", async (c) => {
 	return c.redirect("/");
 });
 
+// Proxy
 app.all("*", checkSessionID, async (c) => {
 	// Rewrite only the URL portion and proxy it.
 	const host = c.req.header("Host") as string;

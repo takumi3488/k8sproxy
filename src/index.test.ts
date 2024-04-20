@@ -72,7 +72,6 @@ describe("Private", () => {
 		});
 		expect(res.status).toBe(302);
 		expect(res.headers.get("Set-Cookie")).toContain("session_id=");
-		console.log(res.headers.get("Set-Cookie"));
 		const sessionId = res.headers
 			.get("Set-Cookie")
 			?.match(/session_id=([^;]+)/)?.[1];
@@ -90,10 +89,17 @@ describe("Private", () => {
 		const res3 = await app.request("/", {
 			headers: {
 				host: "k8sproxy.example.com",
+			},
+		});
+		expect(res3.status).toBe(302);
+
+		const res4 = await app.request("/", {
+			headers: {
+				host: "k8sproxy.example.com",
 				cookie: `session_id=${sessionId};`,
 			},
 		});
-		expect(res3.status).toBe(200);
-		expect(await res3.text()).toContain("k8sproxy pages");
+		expect(res4.status).toBe(200);
+		expect(await res4.text()).toContain("k8sproxy pages");
 	});
 });
