@@ -21,11 +21,13 @@ export const Index: FC<{ urlMapRepository: UrlMapRepository; domain: string }> =
 										<a href={`https://${subdomain}.${domain}`} class="card-title">{subdomain}</a>
 									</span>
 									<span>
+										<label for="proxyTo">Proxy to</label>
 										<input
 											type="text"
 											value={urlMapRepository.urlMaps[subdomain].proxyTo}
 											name="proxyTo"
 											class="text-input"
+											id="proxyTo"
 										/>
 									</span>
 									<span>

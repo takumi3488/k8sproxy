@@ -12,9 +12,9 @@ body {
 }
 
 .text-input {
-    width: 16rem;
+    width: 100%;
     padding: 0.5rem;
-    margin: 0.5rem 0;
+    margin: 0 0 0.5rem;
     font-size: 1rem;
     border-radius: 0.25rem;
     border: 1px solid #ccc;
@@ -69,7 +69,6 @@ body {
     form>span {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
         align-items: flex-start;
     }
 }
@@ -77,6 +76,9 @@ body {
 .card-title {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
+    color: #4c60f3;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .horizontal {
