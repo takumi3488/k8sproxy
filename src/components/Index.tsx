@@ -18,7 +18,7 @@ export const Index: FC<{ urlMapRepository: UrlMapRepository; domain: string }> =
 									class="form"
 								>
 									<span>
-										<a href={`https://${subdomain}.${domain}`}>{subdomain}</a>
+										<a href={`https://${subdomain}.${domain}`} class="card-title">{subdomain}</a>
 									</span>
 									<span>
 										<input
