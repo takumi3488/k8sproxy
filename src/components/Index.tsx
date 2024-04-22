@@ -10,7 +10,7 @@ export const Index: FC<{ urlMapRepository: UrlMapRepository; domain: string }> =
 					<h3>k8sproxy pages</h3>
 					<div class="cards">
 						{Object.keys(urlMapRepository.urlMaps).map((subdomain) => (
-							<div class="card">
+							<div class="card" key={subdomain}>
 								<form
 									action={`/k8sproxy/url_maps/${subdomain}`}
 									method="post"
