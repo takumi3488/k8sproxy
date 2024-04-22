@@ -3,7 +3,7 @@ version: "3"
 tasks:
   test:
     cmds:
-      - docker compose run --build --rm k8sproxy bun test
+      - docker compose run --build --rm -e NODE_ENV=test k8sproxy bun test
   dev:
     cmds:
       - docker compose run --build --rm k8sproxy

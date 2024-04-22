@@ -1,72 +1,22 @@
-import { randomUUID } from "crypto";
 import { Context, Hono, Next } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
+import { getCookie } from "hono/cookie";
 import { cors } from "hono/cors";
-import postgres from "postgres";
-import { createClient } from "redis";
-import { Index } from "./components/Index";
+import { logger } from "hono/logger";
+import { serveStatic } from 'hono/bun'
 import { Layout } from "./components/Layout";
-import { Login } from "./components/Login";
+import { methodOverride } from "hono/method-override";
+import { urlMapRepository } from "./db";
+import { proxyHandler } from "./handlers/proxy";
+import redisClient from "./redis";
+import { loginHandler, loginPageHandler } from "./handlers/login";
+import { addUrlMapHandler, deleteUrlMapHandler, updateUrlMapHandler } from "./handlers/url_mpas";
 
 // Load environment variables
-export const { PASSWORD, REDIS_URL, POSTGRES_URL, NODE_ENV, ALLOWED_ORIGINS } =
+export const { PASSWORD, NODE_ENV, ALLOWED_ORIGINS } =
 	Bun.env;
-if (!PASSWORD) {
-	throw new Error("PASSWORD is not set");
-}
-if (!REDIS_URL) {
-	throw new Error("REDIS_URL is not set");
-}
-if (!POSTGRES_URL) {
-	throw new Error("POSTGRES_URL is not set");
-}
 if (!ALLOWED_ORIGINS) {
 	throw new Error("ALLOWED_ORIGINS is not set");
 }
-
-// Redis client
-const redisClient = createClient({ url: REDIS_URL });
-redisClient.on("error", (err) => console.error(err));
-await redisClient.connect();
-
-// Postgres client
-const sql = postgres(POSTGRES_URL, {
-	transform: postgres.toCamel,
-});
-
-// Get Initial URL map
-interface UrlMap {
-	subdomain: string;
-	proxyTo: string;
-	isSecure: boolean;
-}
-const urlMaps = Object.fromEntries(
-	((await sql<UrlMap[]>`SELECT * FROM url_maps`) || []).map((urlMap) => [
-		urlMap.subdomain,
-		{ proxyTo: urlMap.proxyTo, isSecure: urlMap.isSecure },
-	]),
-);
-
-// Update URL map every minute
-setInterval(async () => {
-	const newUrlMaps = Object.fromEntries(
-		((await sql<UrlMap[]>`SELECT * FROM url_maps`) || []).map((urlMap) => [
-			urlMap.subdomain,
-			{ proxyTo: urlMap.proxyTo, isSecure: urlMap.isSecure },
-		]),
-	);
-	const keys = Object.keys(urlMaps);
-	const newKeys = Object.keys(newUrlMaps);
-	for (const key of keys) {
-		if (!newKeys.includes(key)) {
-			delete urlMaps[key];
-		}
-	}
-	for (const key of newKeys) {
-		urlMaps[key] = newUrlMaps[key];
-	}
-	console.log("Updated URL map", urlMaps);
-}, 1000 * 60);
 
 const app = new Hono();
 app.use(
@@ -76,6 +26,7 @@ app.use(
 		credentials: true,
 	}),
 );
+app.use(logger())
 
 // Check host
 app.use("*", async (c, next) => {
@@ -88,17 +39,21 @@ app.use("*", async (c, next) => {
 
 // Check session ID
 const checkSessionID = async (c: Context, next: Next) => {
+	if (NODE_ENV === "development") return next();
 	const host = c.req.header("Host") as string;
 	const subdomain = host.split(".")[0];
 	const sessionId = getCookie(c, "session_id");
 	if (
-			!(sessionId && (await redisClient.get(`k8sproxy:sessions:${sessionId}`))) &&
-				(subdomain in urlMaps && urlMaps[subdomain].isSecure || subdomain === "k8sproxy")
+		!(sessionId && (await redisClient.get(`k8sproxy:sessions:${sessionId}`))) &&
+		(subdomain in urlMapRepository.urlMaps && urlMapRepository.urlMaps[subdomain].isSecure || subdomain === "k8sproxy")
 	) {
 		return c.redirect("/k8sproxy/login");
 	}
 	await next();
 };
+
+// Static files
+app.use("/styles.css", serveStatic({ path: "./styles.css" }));
 
 // Login page
 app.get(
@@ -111,66 +66,37 @@ app.get(
 		}
 		await next();
 	},
-	async (c) => c.html(<Login />),
+	loginPageHandler
 );
 
 // Login post
-app.post("/k8sproxy/login", async (c) => {
-	const { password } = await c.req.parseBody();
+app.post("/k8sproxy/login", loginHandler);
 
-	// Check password
-	if (typeof password !== "string" || btoa(password) !== PASSWORD) {
-		return c.html(<Login msg="Invalid password" />, 401);
+// Add URL map
+app.post("/k8sproxy/url_maps", async (c, next) => {
+	if (c.req.header("Host") !== "k8sproxy" && NODE_ENV !== "development") {
+		return proxyHandler(c, next)
 	}
+	return addUrlMapHandler(c, next);
+})
 
-	// Set session ID
-	const sessionId = randomUUID({});
-	redisClient.set(`k8sproxy:sessions:${sessionId}`, sessionId, {
-		EX: 60 * 60 * 24 * 30,
-	});
-	setCookie(c, "session_id", sessionId, {
-		path: "/",
-		secure: NODE_ENV === "production",
-		domain: new URL(c.req.url).hostname.split(".").slice(-2).join("."),
-		httpOnly: true,
-		maxAge: 60 * 60 * 24 * 30,
-		sameSite: NODE_ENV === "production" ? "None" : "Lax",
-	});
-	return c.redirect("/");
-});
+// Update URL map
+app.post("/k8sproxy/url_maps/:subdomain", async (c, next) => {
+	if (c.req.header("Host") !== "k8sproxy" && NODE_ENV !== "development") {
+		return proxyHandler(c, next)
+	}
+	const body = await c.req.parseBody();
+	switch (body._method) {
+		case "DELETE":
+			return deleteUrlMapHandler(c, next);
+		default:
+			return updateUrlMapHandler(c, next);
+	}
+})
 
 // Proxy
-app.all("*", checkSessionID, async (c) => {
-	// Rewrite only the URL portion and proxy it.
-	const host = c.req.header("Host") as string;
-	const subdomain = host.split(".")[0];
-	const domain = host.split(".").slice(1).join(".");
-	if (subdomain === "k8sproxy") {
-		return c.html(
-			<Index
-				paths={Object.keys(urlMaps).map(
-					(urlMap) => `https://${urlMap}.${domain}`,
-				)}
-			/>,
-		);
-	}
-	const raw = c.req.raw;
-	const url = urlMaps[subdomain].proxyTo + c.req.path;
-	raw.headers.set(
-		"host",
-		urlMaps[subdomain].proxyTo.replace(/^https?:\/\//, "").split("/")[0],
-	);
-	raw.headers.delete("origin");
-	const req = new Request(url, {
-		method: raw.method,
-		headers: raw.headers,
-		body: raw.body,
-		credentials: raw.credentials,
-	});
-	console.log(JSON.stringify({ url: req.url }, null, 2));
-	console.log(JSON.stringify({ headers: req.headers }, null, 2));
-	console.log(JSON.stringify({ body: req.body }, null, 2));
-	return fetch(req);
-});
+app.all("*", checkSessionID, proxyHandler);
+
+console.log(`NODE_ENV=${NODE_ENV}`);
 
 export default app;

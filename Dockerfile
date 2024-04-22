@@ -17,6 +17,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 
 # for development, copy node_modules from temp directory
 FROM base AS dev
+ENV NODE_ENV=development
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 

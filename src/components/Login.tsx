@@ -5,7 +5,7 @@ export const Login: FC<{ msg?: string }> = ({ msg }) => {
 	return (
 		<Layout>
 			<div>
-				<h3 class="text-center mt-8">Login to k8sproxy</h3>
+				<h3 class="">Login to k8sproxy</h3>
 				{msg && <p class="notice">{msg}</p>}
 				<form action="/k8sproxy/login" method="post">
 					<div>
@@ -13,9 +13,10 @@ export const Login: FC<{ msg?: string }> = ({ msg }) => {
 							type="password"
 							placeholder="Enter password"
 							name="password"
+							class="text-input"
 						/>
 					</div>
-					<button type="submit">Submit</button>
+					<button type="submit" class="btn">Submit</button>
 				</form>
 			</div>
 		</Layout>
