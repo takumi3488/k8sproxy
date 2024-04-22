@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "bun run --hot src/index.tsx",
-    "build": "bun run tailwind && bun build src/index.tsx --minify --target=node --outfile=dist/index.js",
+    "build": "bun build src/index.tsx --minify --target=node --outfile=dist/index.js",
     "check": "bunx @biomejs/biome check --apply src/**",
     "check:unsafe": "bunx @biomejs/biome check --apply-unsafe src/**"
   },
