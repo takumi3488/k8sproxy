@@ -1,11 +1,11 @@
-import { setCookie } from "hono/cookie";
-import { H } from "hono/types";
-import redisClient from "../redis";
-import { Login } from "../components/Login";
 import { randomUUID } from "crypto";
+import { setCookie } from "hono/cookie";
+import type { H } from "hono/types";
+import { Login } from "../components/Login";
+import redisClient from "../redis";
 
 // Load environment variables
-const {PASSWORD, NODE_ENV} = Bun.env;
+const { PASSWORD, NODE_ENV } = Bun.env;
 if (!PASSWORD) {
 	throw new Error("PASSWORD is not set");
 }
@@ -39,4 +39,4 @@ export const loginHandler: H = async (c) => {
 		sameSite: NODE_ENV === "production" ? "None" : "Lax",
 	});
 	return c.redirect("/");
-}
+};

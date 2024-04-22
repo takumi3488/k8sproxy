@@ -1,4 +1,4 @@
-import { FC } from "hono/jsx";
+import type { FC } from "hono/jsx";
 
 export const Layout: FC = ({ children }) => {
 	return (
@@ -10,9 +10,7 @@ export const Layout: FC = ({ children }) => {
 				<link rel="stylesheet" href="/styles.css" />
 			</head>
 			<body>
-				<div class="container">
-					{children}
-				</div>
+				<div class="container">{children}</div>
 			</body>
 		</html>
 	);

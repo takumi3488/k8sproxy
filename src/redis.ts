@@ -11,4 +11,4 @@ const redisClient = createClient({ url: REDIS_URL });
 redisClient.on("error", (err) => console.error(err));
 await redisClient.connect();
 
-export default redisClient
+export default redisClient;

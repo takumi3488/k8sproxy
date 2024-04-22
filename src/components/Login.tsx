@@ -1,4 +1,4 @@
-import { FC } from "hono/jsx";
+import type { FC } from "hono/jsx";
 import { Layout } from "./Layout";
 
 export const Login: FC<{ msg?: string }> = ({ msg }) => {
@@ -16,7 +16,9 @@ export const Login: FC<{ msg?: string }> = ({ msg }) => {
 							class="text-input"
 						/>
 					</div>
-					<button type="submit" class="btn">Submit</button>
+					<button type="submit" class="btn">
+						Submit
+					</button>
 				</form>
 			</div>
 		</Layout>

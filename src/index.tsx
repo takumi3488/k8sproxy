@@ -1,19 +1,22 @@
-import { Context, Hono, Next } from "hono";
+import { type Context, Hono, type Next } from "hono";
+import { serveStatic } from "hono/bun";
 import { getCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { serveStatic } from 'hono/bun'
-import { Layout } from "./components/Layout";
 import { methodOverride } from "hono/method-override";
+import { Layout } from "./components/Layout";
 import { urlMapRepository } from "./db";
-import { proxyHandler } from "./handlers/proxy";
-import redisClient from "./redis";
 import { loginHandler, loginPageHandler } from "./handlers/login";
-import { addUrlMapHandler, deleteUrlMapHandler, updateUrlMapHandler } from "./handlers/url_mpas";
+import { proxyHandler } from "./handlers/proxy";
+import {
+	addUrlMapHandler,
+	deleteUrlMapHandler,
+	updateUrlMapHandler,
+} from "./handlers/url_mpas";
+import redisClient from "./redis";
 
 // Load environment variables
-export const { PASSWORD, NODE_ENV, ALLOWED_ORIGINS } =
-	Bun.env;
+export const { PASSWORD, NODE_ENV, ALLOWED_ORIGINS } = Bun.env;
 if (!ALLOWED_ORIGINS) {
 	throw new Error("ALLOWED_ORIGINS is not set");
 }
@@ -26,7 +29,7 @@ app.use(
 		credentials: true,
 	}),
 );
-app.use(logger())
+app.use(logger());
 
 // Check host
 app.use("*", async (c, next) => {
@@ -45,7 +48,9 @@ const checkSessionID = async (c: Context, next: Next) => {
 	const sessionId = getCookie(c, "session_id");
 	if (
 		!(sessionId && (await redisClient.get(`k8sproxy:sessions:${sessionId}`))) &&
-		(subdomain in urlMapRepository.urlMaps && urlMapRepository.urlMaps[subdomain].isSecure || subdomain === "k8sproxy")
+		((subdomain in urlMapRepository.urlMaps &&
+			urlMapRepository.urlMaps[subdomain].isSecure) ||
+			subdomain === "k8sproxy")
 	) {
 		return c.redirect("/k8sproxy/login");
 	}
@@ -66,7 +71,7 @@ app.get(
 		}
 		await next();
 	},
-	loginPageHandler
+	loginPageHandler,
 );
 
 // Login post
@@ -75,15 +80,15 @@ app.post("/k8sproxy/login", loginHandler);
 // Add URL map
 app.post("/k8sproxy/url_maps", async (c, next) => {
 	if (c.req.header("Host") !== "k8sproxy" && NODE_ENV !== "development") {
-		return proxyHandler(c, next)
+		return proxyHandler(c, next);
 	}
 	return addUrlMapHandler(c, next);
-})
+});
 
 // Update URL map
 app.post("/k8sproxy/url_maps/:subdomain", async (c, next) => {
 	if (c.req.header("Host") !== "k8sproxy" && NODE_ENV !== "development") {
-		return proxyHandler(c, next)
+		return proxyHandler(c, next);
 	}
 	const body = await c.req.parseBody();
 	switch (body._method) {
@@ -92,7 +97,7 @@ app.post("/k8sproxy/url_maps/:subdomain", async (c, next) => {
 		default:
 			return updateUrlMapHandler(c, next);
 	}
-})
+});
 
 // Proxy
 app.all("*", checkSessionID, proxyHandler);
