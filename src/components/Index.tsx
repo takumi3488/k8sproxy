@@ -12,11 +12,21 @@ export const Index: FC<{ urlMapRepository: UrlMapRepository; domain: string }> =
 						<form action="/k8sproxy/url_maps" method="post" class="form">
 							<span>
 								<label for="subdomain">Subdomain</label>
-								<input type="text" name="subdomain" class="text-input" id="subdomain" />
+								<input
+									type="text"
+									name="subdomain"
+									class="text-input"
+									id="subdomain"
+								/>
 							</span>
 							<span>
 								<label for="proxyTo">Proxy to</label>
-								<input type="text" name="proxyTo" class="text-input" id="proxyTo" />
+								<input
+									type="text"
+									name="proxyTo"
+									class="text-input"
+									id="proxyTo"
+								/>
 							</span>
 							<span>
 								<span class="horizontal">
@@ -41,7 +51,12 @@ export const Index: FC<{ urlMapRepository: UrlMapRepository; domain: string }> =
 									class="form"
 								>
 									<span>
-										<a href={`https://${subdomain}.${domain}`} class="card-title">{subdomain}</a>
+										<a
+											href={`https://${subdomain}.${domain}`}
+											class="card-title"
+										>
+											{subdomain}
+										</a>
 									</span>
 									<span>
 										<label for="proxyTo">Proxy to</label>

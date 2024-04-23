@@ -3,13 +3,14 @@ import { urlMapRepository } from "../db";
 
 export const addUrlMapHandler: H = async (c) => {
 	const { subdomain, proxyTo, isSecure } = await c.req.parseBody();
-	if (
-		typeof subdomain !== "string" ||
-		typeof proxyTo !== "string"
-	) {
+	if (typeof subdomain !== "string" || typeof proxyTo !== "string") {
 		return c.html("Invalid request", 400);
 	}
-	await urlMapRepository.addUrlMap({ subdomain, proxyTo, isSecure: isSecure === "on"});
+	await urlMapRepository.addUrlMap({
+		subdomain,
+		proxyTo,
+		isSecure: isSecure === "on",
+	});
 	return c.redirect("/");
 };
 
