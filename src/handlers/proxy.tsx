@@ -21,6 +21,7 @@ export const proxyHandler: H = async (c) => {
 	}
 	const raw = c.req.raw;
 	const url = urlMapRepository.urlMaps[subdomain].proxyTo + c.req.path + queriesToUrlString(c.req.queries());
+	console.log("Proxying to: ", url);
 	raw.headers.set(
 		"host",
 		urlMapRepository.urlMaps[subdomain].proxyTo
