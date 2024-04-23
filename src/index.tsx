@@ -79,7 +79,7 @@ app.post("/k8sproxy/login", loginHandler);
 
 // Add URL map
 app.post("/k8sproxy/url_maps", async (c, next) => {
-	if (c.req.header("Host") !== "k8sproxy" && NODE_ENV !== "development") {
+	if (!c.req.header("Host")?.startsWith("k8sproxy.") && NODE_ENV !== "development") {
 		return proxyHandler(c, next);
 	}
 	return addUrlMapHandler(c, next);
@@ -87,7 +87,7 @@ app.post("/k8sproxy/url_maps", async (c, next) => {
 
 // Update URL map
 app.post("/k8sproxy/url_maps/:subdomain", async (c, next) => {
-	if (c.req.header("Host") !== "k8sproxy" && NODE_ENV !== "development") {
+	if (!c.req.header("Host")?.startsWith("k8sproxy.") && NODE_ENV !== "development") {
 		return proxyHandler(c, next);
 	}
 	const body = await c.req.parseBody();
