@@ -40,18 +40,20 @@ export class UrlMapRepository {
 	async deleteUrlMap(subdomain: string) {
 		await sql`DELETE FROM url_maps WHERE subdomain = ${subdomain}`;
 		delete this.urlMaps[subdomain];
+		console.log(`Deleted: ${JSON.stringify(this.urlMaps, null, 2)}`);
 	}
 
 	async addUrlMap(subdomain: Subdomain) {
 		await sql`INSERT INTO url_maps ${sql(subdomain)}`;
 		this.urlMaps[subdomain.subdomain] = subdomain;
+		console.log(`Added ${JSON.stringify(this.urlMaps, null, 2)}`);
 	}
 
 	async updateUrlMap(subdomain: Subdomain) {
-		await sql`UPDATE url_maps SET ${sql(subdomain)} WHERE subdomain = ${
-			subdomain.subdomain
-		}`;
+		await sql`UPDATE url_maps SET ${sql(subdomain)} WHERE subdomain = ${subdomain.subdomain
+			}`;
 		this.urlMaps[subdomain.subdomain] = subdomain;
+		console.log(`Updated ${JSON.stringify(this.urlMaps, null, 2)}`);
 	}
 }
 
