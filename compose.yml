@@ -11,7 +11,7 @@ services:
       postgres:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.docker
     volumes:
       - .:/usr/src/app
   nginx:
@@ -28,6 +28,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    ports:
+      - "6379:6379"
   postgres:
     image: postgres:16.2-alpine
     healthcheck:
@@ -41,3 +43,5 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"

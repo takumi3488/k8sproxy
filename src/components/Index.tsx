@@ -8,6 +8,29 @@ export const Index: FC<{ urlMapRepository: UrlMapRepository; domain: string }> =
 			<Layout>
 				<div>
 					<h3>k8sproxy pages</h3>
+					<div class="card card-gray">
+						<form action="/k8sproxy/url_maps" method="post" class="form">
+							<span>
+								<label for="subdomain">Subdomain</label>
+								<input type="text" name="subdomain" class="text-input" id="subdomain" />
+							</span>
+							<span>
+								<label for="proxyTo">Proxy to</label>
+								<input type="text" name="proxyTo" class="text-input" id="proxyTo" />
+							</span>
+							<span>
+								<span class="horizontal">
+									<input type="checkbox" name="isSecure" id="isSecure" />
+									<label for="isSecure">Password</label>
+								</span>
+							</span>
+							<span class="pt-4">
+								<button type="submit" class="btn">
+									Create
+								</button>
+							</span>
+						</form>
+					</div>
 					<div class="cards">
 						{Object.keys(urlMapRepository.urlMaps).map((subdomain) => (
 							<div class="card" key={subdomain}>

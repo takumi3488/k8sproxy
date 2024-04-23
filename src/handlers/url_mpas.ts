@@ -5,12 +5,11 @@ export const addUrlMapHandler: H = async (c) => {
 	const { subdomain, proxyTo, isSecure } = await c.req.parseBody();
 	if (
 		typeof subdomain !== "string" ||
-		typeof proxyTo !== "string" ||
-		typeof isSecure !== "boolean"
+		typeof proxyTo !== "string"
 	) {
 		return c.html("Invalid request", 400);
 	}
-	await urlMapRepository.addUrlMap({ subdomain, proxyTo, isSecure });
+	await urlMapRepository.addUrlMap({ subdomain, proxyTo, isSecure: isSecure === "on"});
 	return c.redirect("/");
 };
 
