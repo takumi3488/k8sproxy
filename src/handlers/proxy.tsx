@@ -20,14 +20,13 @@ export const proxyHandler: H = async (c) => {
 		);
 	}
 	const raw = c.req.raw;
-	const url = urlMapRepository.urlMaps[subdomain].proxyTo + queriesToUrlString(c.req.queries());
+	const url = urlMapRepository.urlMaps[subdomain].proxyTo + c.req.path + queriesToUrlString(c.req.queries());
 	raw.headers.set(
 		"host",
 		urlMapRepository.urlMaps[subdomain].proxyTo
 			.replace(/^https?:\/\//, "")
 			.split("/")[0],
 	);
-	raw.headers.delete("origin");
 	const req = new Request(url, {
 		method: raw.method,
 		headers: raw.headers,
