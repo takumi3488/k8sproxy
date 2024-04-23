@@ -2,6 +2,13 @@ import type { H } from "hono/types";
 import { Index } from "../components/Index";
 import { urlMapRepository } from "../db";
 
+const queriesToUrlString = (queries: Record<string, string[]>): string => {
+	const keys = Object.keys(queries);
+	if (keys.length === 0) return "";
+	const q = keys.map((key) => queries[key].map((v) => `${key}=${v}`).join("&")).join("&");
+	return `?${q}`;
+}
+
 export const proxyHandler: H = async (c) => {
 	// Rewrite only the URL portion and proxy it.
 	const host = c.req.header("Host") as string;
@@ -13,7 +20,7 @@ export const proxyHandler: H = async (c) => {
 		);
 	}
 	const raw = c.req.raw;
-	const url = urlMapRepository.urlMaps[subdomain].proxyTo + c.req.path;
+	const url = urlMapRepository.urlMaps[subdomain].proxyTo + queriesToUrlString(c.req.queries());
 	raw.headers.set(
 		"host",
 		urlMapRepository.urlMaps[subdomain].proxyTo
