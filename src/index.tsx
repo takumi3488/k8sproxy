@@ -16,7 +16,10 @@ import {
 import redisClient from "./redis";
 
 // Load environment variables
-export const { PASSWORD, NODE_ENV, ALLOWED_ORIGINS } = Bun.env;
+export const { PASSWORD, NODE_ENV, ALLOWED_ORIGINS, API_KEY } = Bun.env;
+if (!PASSWORD) {
+	throw new Error("PASSWORD is not set");
+}
 if (!ALLOWED_ORIGINS) {
 	throw new Error("ALLOWED_ORIGINS is not set");
 }
@@ -46,11 +49,13 @@ const checkSessionID = async (c: Context, next: Next) => {
 	const host = c.req.header("Host") as string;
 	const subdomain = host.split(".")[0];
 	const sessionId = getCookie(c, "session_id");
+	const apiKey = c.req.header("x-api-key");
 	if (
 		!(sessionId && (await redisClient.get(`k8sproxy:sessions:${sessionId}`))) &&
 		((subdomain in urlMapRepository.urlMaps &&
 			urlMapRepository.urlMaps[subdomain].isSecure) ||
-			subdomain === "k8sproxy")
+			subdomain === "k8sproxy") &&
+		apiKey !== API_KEY
 	) {
 		return c.redirect("/k8sproxy/login");
 	}
@@ -79,7 +84,10 @@ app.post("/k8sproxy/login", loginHandler);
 
 // Add URL map
 app.post("/k8sproxy/url_maps", async (c, next) => {
-	if (!c.req.header("Host")?.startsWith("k8sproxy.") && NODE_ENV !== "development") {
+	if (
+		!c.req.header("Host")?.startsWith("k8sproxy.") &&
+		NODE_ENV !== "development"
+	) {
 		return proxyHandler(c, next);
 	}
 	return addUrlMapHandler(c, next);
@@ -87,7 +95,10 @@ app.post("/k8sproxy/url_maps", async (c, next) => {
 
 // Update URL map
 app.post("/k8sproxy/url_maps/:subdomain", async (c, next) => {
-	if (!c.req.header("Host")?.startsWith("k8sproxy.") && NODE_ENV !== "development") {
+	if (
+		!c.req.header("Host")?.startsWith("k8sproxy.") &&
+		NODE_ENV !== "development"
+	) {
 		return proxyHandler(c, next);
 	}
 	const body = await c.req.parseBody();

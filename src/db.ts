@@ -50,8 +50,9 @@ export class UrlMapRepository {
 	}
 
 	async updateUrlMap(subdomain: Subdomain) {
-		await sql`UPDATE url_maps SET ${sql(subdomain)} WHERE subdomain = ${subdomain.subdomain
-			}`;
+		await sql`UPDATE url_maps SET ${sql(subdomain)} WHERE subdomain = ${
+			subdomain.subdomain
+		}`;
 		this.urlMaps[subdomain.subdomain] = subdomain;
 		console.log(`Updated ${JSON.stringify(this.urlMaps, null, 2)}`);
 	}

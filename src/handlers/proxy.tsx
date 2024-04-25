@@ -5,9 +5,11 @@ import { urlMapRepository } from "../db";
 const queriesToUrlString = (queries: Record<string, string[]>): string => {
 	const keys = Object.keys(queries);
 	if (keys.length === 0) return "";
-	const q = keys.map((key) => queries[key].map((v) => `${key}=${v}`).join("&")).join("&");
+	const q = keys
+		.map((key) => queries[key].map((v) => `${key}=${v}`).join("&"))
+		.join("&");
 	return `?${q}`;
-}
+};
 
 export const proxyHandler: H = async (c) => {
 	// Rewrite only the URL portion and proxy it.
@@ -20,7 +22,10 @@ export const proxyHandler: H = async (c) => {
 		);
 	}
 	const raw = c.req.raw;
-	const url = urlMapRepository.urlMaps[subdomain].proxyTo + c.req.path + queriesToUrlString(c.req.queries());
+	const url =
+		urlMapRepository.urlMaps[subdomain].proxyTo +
+		c.req.path +
+		queriesToUrlString(c.req.queries());
 	console.log("Proxying to: ", url);
 	raw.headers.set(
 		"host",

@@ -102,4 +102,24 @@ describe("Private", () => {
 		expect(res4.status).toBe(200);
 		expect(await res4.text()).toContain("k8sproxy pages");
 	});
+
+	test("with wrong api key", async () => {
+		const res = await app.request("/", {
+			headers: {
+				host: "private.example.com",
+				"X-Api-Key": "wrong-api-key",
+			},
+		});
+		expect(res.status).toBe(302);
+	});
+
+	test("with correct api key", async () => {
+		const res = await app.request("/", {
+			headers: {
+				host: "private.example.com",
+				"X-Api-Key": "test-api-key",
+			},
+		});
+		expect(res.status).toBe(200);
+	});
 });
