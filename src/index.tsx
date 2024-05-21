@@ -46,6 +46,9 @@ app.use("*", async (c, next) => {
 // Check session ID
 const checkSessionID = async (c: Context, next: Next) => {
 	if (NODE_ENV === "development") return next();
+	if (c.req.path === "/manifest.json" || c.req.path === "/favicon.ico") {
+		return next();
+	}
 	const host = c.req.header("Host") as string;
 	const subdomain = host.split(".")[0];
 	const sessionId = getCookie(c, "session_id");
